@@ -1,0 +1,235 @@
+
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <title>NumBalance – Калькулятор середнього</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+  <meta name="description" content="NumBalance – зручний калькулятор середнього арифметичного з темною темою, збереженням даних і адаптивним інтерфейсом.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    body.light {
+      background: linear-gradient(135deg, #cce0ff, #e6f0ff);
+      color: #003366;
+    }
+
+    body.dark {
+      background: linear-gradient(135deg, #2c3e50, #4ca1af);
+      color: #ecf0f1;
+    }
+
+    .container {
+      background-color: white;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 8px 20px rgba(0, 64, 128, 0.25);
+      width: 100%;
+      max-width: 540px;
+      transition: all 0.3s ease-in-out;
+    }
+
+    body.dark .container {
+      background-color: #2b2b2b;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 26px;
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+
+    h2 {
+      text-align: center;
+      font-size: 16px;
+      margin-bottom: 25px;
+      font-weight: 400;
+      color: #666;
+    }
+
+    input[type="number"] {
+      padding: 12px;
+      margin: 6px 0;
+      width: 100%;
+      border: 2px solid #99ccff;
+      border-radius: 10px;
+      font-size: 16px;
+    }
+
+    input[type="number"]:focus {
+      border-color: #3399ff;
+      outline: none;
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+      justify-content: center;
+    }
+
+    button {
+      background-color: #3399ff;
+      color: white;
+      padding: 12px 16px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
+      min-width: 120px;
+    }
+
+    button:hover {
+      background-color: #267acc;
+      transform: translateY(-2px);
+    }
+
+    #result {
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .theme-toggle {
+      text-align: center;
+      margin-top: 15px;
+    }
+
+    .theme-toggle button {
+      background: none;
+      border: 2px solid #3399ff;
+      color: #3399ff;
+      padding: 8px 16px;
+      border-radius: 10px;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 12px;
+      opacity: 0.7;
+    }
+
+    .footer a {
+      color: #3399ff;
+      text-decoration: none;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 500px) {
+      .button-row {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body class="light">
+  <div class="container">
+    <h1>📘 NumBalance</h1>
+    <h2>Калькулятор середнього арифметичного</h2>
+
+    <div id="inputs">
+      <input type="number" placeholder="Число 1">
+    </div>
+
+    <div class="button-row">
+      <button onclick="addField()">➕ Додати</button>
+      <button onclick="clearFields()">🗑️ Очистити</button>
+      <button onclick="calculateAverage()">📊 Обчислити</button>
+      <button onclick="saveInputs()">💾 Зберегти</button>
+      <button onclick="loadInputs()">📂 Завантажити</button>
+    </div>
+
+    <div class="theme-toggle">
+      <button onclick="toggleTheme()">🌓 Змінити тему</button>
+    </div>
+
+    <p id="result"></p>
+    <div class="footer">
+      Створено з ❤️. Шрифт: <a href="https://fonts.google.com/specimen/Montserrat" target="_blank">Montserrat</a>
+    </div>
+  </div>
+
+  <script>
+    let count = 1;
+    function addField(value = '') {
+      count++;
+      const input = document.createElement("input");
+      input.type = "number";
+      input.placeholder = `Число ${count}`;
+      input.value = value;
+      document.getElementById("inputs").appendChild(input);
+    }
+    function clearFields() {
+      const container = document.getElementById("inputs");
+      container.innerHTML = '';
+      count = 1;
+      addField('', true);
+      document.getElementById("result").innerText = '';
+      localStorage.removeItem("average_inputs");
+    }
+    function calculateAverage() {
+      const inputs = document.querySelectorAll("#inputs input");
+      const numbers = [];
+      inputs.forEach(input => {
+        const value = parseFloat(input.value);
+        if (!isNaN(value)) numbers.push(value);
+      });
+      const resultElement = document.getElementById("result");
+      if (numbers.length === 0) {
+        resultElement.innerText = "❌ Введіть хоча б одне число.";
+        return;
+      }
+      const sum = numbers.reduce((a, b) => a + b, 0);
+      const avg = sum / numbers.length;
+      resultElement.innerText = `✅ Середнє арифметичне: ${avg.toFixed(2)}`;
+    }
+    function saveInputs() {
+      const inputs = Array.from(document.querySelectorAll("#inputs input")).map(i => i.value);
+      localStorage.setItem("average_inputs", JSON.stringify(inputs));
+      alert("✅ Збережено!");
+    }
+    function loadInputs() {
+      const data = JSON.parse(localStorage.getItem("average_inputs") || "[]");
+      clearFields();
+      if (data.length > 0) {
+        document.getElementById("inputs").innerHTML = '';
+        data.forEach((val, idx) => {
+          count = idx;
+          addField(val);
+        });
+      }
+    }
+    function toggleTheme() {
+      document.body.classList.toggle("dark");
+      document.body.classList.toggle("light");
+    }
+    window.onload = () => {
+      if (!document.querySelector("#inputs input")) {
+        addField();
+      }
+    };
+  </script>
+</body>
+</html>
